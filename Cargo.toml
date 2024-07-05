@@ -19,6 +19,8 @@ defmt = ["dep:defmt"]
 bitfield-struct = "0.8.0"
 defmt = { version = "0.3.8", optional = true }
 hardware-registers = "0.2.0"
+
+[patch.crates-io]
 # hardware-registers = { git = "http://github.com/sunsided/hardware-registers", features = ["i2c", "spi"] }
 
 [package.metadata.docs.rs]
