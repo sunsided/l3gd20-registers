@@ -1,0 +1,25 @@
+[package]
+name = "l3gd20-registers"
+version = "0.1.0-alpha.1"
+authors = ["Markus Mayer <widemeadows@gmail.com>"]
+categories = ["embedded", "hardware-support", "no-std", "science::robotics"]
+description = "A typed map of the STMicroelectronics L3GD20 Gyroscope registers"
+keywords = ["embedded-hal", "l3gd20", "mems", "i2c", "registers"]
+license = "EUPL-1.2 OR MIT OR Apache-2.0"
+homepage = "https://github.com/sunsided/l3gd20-registers"
+repository = "https://github.com/sunsided/l3gd20-registers"
+readme = "README.md"
+edition = "2021"
+rust-version = "1.64"
+
+[features]
+defmt = ["dep:defmt"]
+
+[dependencies]
+bitfield-struct = "0.8.0"
+defmt = { version = "0.3.8", optional = true }
+hardware-registers = "0.1.0"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
