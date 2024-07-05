@@ -1,5 +1,5 @@
-use core::ops::Add;
 use crate::{OutXHigh, OutXLow, OutYHigh, OutYLow, OutZHigh, OutZLow};
+use core::ops::Add;
 
 impl Add<OutXHigh> for OutXLow {
     type Output = i16;
