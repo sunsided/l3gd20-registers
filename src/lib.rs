@@ -78,8 +78,11 @@ macro_rules! writable_register {
     };
 }
 
-pub mod gyro;
+mod gyro;
 mod types;
+
+pub use gyro::*;
+pub use types::*;
 
 /// A sensor register.
 pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> + From<u8> + Into<u8> {}

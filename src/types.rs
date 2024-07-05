@@ -85,7 +85,7 @@ pub enum HighpassFilterMode {
     NormalModeResetFilter = 0b00,
     /// Reference signal for filtering
     ReferenceSignal = 0b01,
-    // Normal mode
+    /// Normal mode
     NormalMode = 0b10,
     /// Autoreset on interrupt event
     AutoresetOnInterrupt = 0b11,
