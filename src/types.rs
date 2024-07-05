@@ -76,6 +76,71 @@ pub enum Bandwidth {
 }
 
 impl Bandwidth {
+    /// Determines the bandwidth in Hertz at the given output data rate.
+    #[must_use]
+    pub fn hz_at(&self, odr: OutputDataRate) -> f32 {
+        match self {
+            Bandwidth::Narrowest => match odr {
+                OutputDataRate::Hz95 => 12.5,
+                OutputDataRate::Hz190 => 12.5,
+                OutputDataRate::Hz380 => 20.0,
+                OutputDataRate::Hz760 => 30.0,
+            },
+            Bandwidth::Narrow => match odr {
+                OutputDataRate::Hz95 => 25.0,
+                OutputDataRate::Hz190 => 25.0,
+                OutputDataRate::Hz380 => 25.0,
+                OutputDataRate::Hz760 => 35.0,
+            },
+            Bandwidth::Medium => match odr {
+                OutputDataRate::Hz95 => 25.0,
+                OutputDataRate::Hz190 => 50.0,
+                OutputDataRate::Hz380 => 50.0,
+                OutputDataRate::Hz760 => 50.0,
+            },
+            Bandwidth::Wide => match odr {
+                OutputDataRate::Hz95 => 25.0,
+                OutputDataRate::Hz190 => 70.0,
+                OutputDataRate::Hz380 => 100.0,
+                OutputDataRate::Hz760 => 100.0,
+            },
+        }
+    }
+
+    /// Determines the square root of the bandwidth at the given output data rate.
+    ///
+    /// This factor plays a role in determining the rate noise density.
+    #[must_use]
+    pub fn sqrt_hz_at(&self, odr: OutputDataRate) -> f32 {
+        #[allow(clippy::excessive_precision)]
+        match self {
+            Bandwidth::Narrowest => match odr {
+                OutputDataRate::Hz95 => 3.5355339059327378,  // √(12.5 Hz)
+                OutputDataRate::Hz190 => 3.5355339059327378, // √(12.5 Hz)
+                OutputDataRate::Hz380 => 4.47213595499958,   // √(20.0 Hz)
+                OutputDataRate::Hz760 => 5.477225575051661,  // √(30.0 Hz)
+            },
+            Bandwidth::Narrow => match odr {
+                OutputDataRate::Hz95 => 5.0,                // √(25.0 Hz)
+                OutputDataRate::Hz190 => 5.0,               // √(25.0 Hz)
+                OutputDataRate::Hz380 => 25.0,              // √(25.0 Hz)
+                OutputDataRate::Hz760 => 5.916079783099616, // √(35.0 Hz)
+            },
+            Bandwidth::Medium => match odr {
+                OutputDataRate::Hz95 => 5.0,                 // √(25.0 Hz)
+                OutputDataRate::Hz190 => 7.0710678118654755, // √(50.0 Hz)
+                OutputDataRate::Hz380 => 7.0710678118654755, // √(50.0 Hz)
+                OutputDataRate::Hz760 => 7.0710678118654755, // √(50.0 Hz)
+            },
+            Bandwidth::Wide => match odr {
+                OutputDataRate::Hz95 => 5.0,                // √(25.0 Hz)
+                OutputDataRate::Hz190 => 8.366600265340756, // √(70.0 Hz)
+                OutputDataRate::Hz380 => 10.0,              // √(100.0 Hz)
+                OutputDataRate::Hz760 => 10.0,              // √(100.0 Hz)
+            },
+        }
+    }
+
     /// Converts the value into an `u8`.
     pub const fn into_bits(self) -> u8 {
         self as u8
@@ -129,21 +194,37 @@ impl HighpassFilterMode {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub enum Sensitivity {
-    /// 250 dps
+    /// # 250 dps
     ///
+    /// This is usually the most appropriate setting for human interaction applications.
+    /// It provides a good balance between sensitivity and range, capturing fine movements with
+    /// sufficient detail. Most human motions, including head movements and hand gestures,
+    /// fall well within this range.
+    ///
+    /// ## Resolution and error
     /// 8.75 mdps/digit; ±10 dps at zero-rate level
     D250 = 0b00,
-    /// 500 dps
+
+    /// # 500 dps
     ///
+    /// This setting is used if there are slightly faster motions involved. It offers a wider
+    /// range at the expense of some resolution but still captures typical human movements effectively.
+    ///
+    /// ## Resolution and error
     /// 17.50 mdps/digit; ±15 dps at zero-rate level
     D500 = 0b01,
-    /// 2000 dps
+
+    /// # 2000 dps
     ///
+    /// This is generally too high for most human interaction applications. It is suitable for
+    /// high-speed rotational measurements, such as those found in fast-spinning objects or certain
+    /// industrial applications.
+    ///
+    /// ## Resolution and error
     /// 70 mdps/digit; ±75 dps at zero-rate level
     D2000 = 0b10,
-    /// 2000 dps
-    ///
-    /// 70 mdps/digit; ±75 dps at zero-rate level
+
+    /// Same as [`Sensitivity::D2000`]
     D2000_11 = 0b11,
 }
 
