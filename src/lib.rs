@@ -13,7 +13,9 @@
 pub mod prelude {
     pub use crate::{Register, WritableRegister};
     pub use hardware_registers::i2c::*;
+    pub use hardware_registers::register_address::{RegisterAddress6, RegisterAddress8};
     pub use hardware_registers::sizes::R1;
+    pub use hardware_registers::spi::*;
     pub use hardware_registers::{FromBits, HardwareRegister, ToBits, WritableHardwareRegister};
 }
 
@@ -35,6 +37,15 @@ macro_rules! readable_register {
                 $crate::prelude::DeviceAddress7::new(DEFAULT_DEVICE_ADDRESS);
             const REGISTER_ADDRESS: $crate::prelude::RegisterAddress8 =
                 $crate::prelude::RegisterAddress8::new(($addr).addr());
+        }
+
+        impl $crate::prelude::SPIRegister<$crate::prelude::RegisterAddress6, $crate::prelude::R1>
+            for $type
+        {
+            type Backing = u8;
+
+            const REGISTER_ADDRESS: $crate::prelude::RegisterAddress6 =
+                $crate::prelude::RegisterAddress6::new(($addr).addr());
         }
 
         impl $crate::prelude::ToBits for $type {
@@ -67,8 +78,8 @@ macro_rules! writable_register {
     };
 }
 
-pub mod accel;
-pub mod mag;
+pub mod gyro;
+mod types;
 
 /// A sensor register.
 pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> + From<u8> + Into<u8> {}
