@@ -109,7 +109,9 @@ impl Bandwidth {
 
     /// Determines the square root of the bandwidth at the given output data rate.
     ///
-    /// This factor plays a role in determining the rate noise density.
+    /// This factor plays a role in determining the rate noise density. For the L3GD20,
+    /// the rate noise density is 0.03 dps/√Hz, so multiplying 0.03 with this result
+    /// gives an effective value.
     #[must_use]
     pub fn sqrt_hz_at(&self, odr: OutputDataRate) -> f32 {
         #[allow(clippy::excessive_precision)]
