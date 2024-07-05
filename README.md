@@ -1,7 +1,7 @@
 # STMicroelectronics L3GD20 Gyroscope Registers
 
-<!-- [![Crates.io][crates-image]][crates-link]
-[![Docs][docs-image]][docs-link] -->
+[![Crates.io][crates-image]][crates-link]
+[![Docs][docs-image]][docs-link]
 [![Build Status][build-image]][build-link]
 [![Safety Dance][safety-image]][safety-link]
 ![MSRV][msrv-image]
