@@ -41,22 +41,22 @@ pub enum Bandwidth {
     /// * 12.5 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 20 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 30 at 760 Hz ([`OutputDataRate::Hz760`])
-    Bw00 = 0b00,
+    Narrowest = 0b00,
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 25 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 25 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 35 at 760 Hz ([`OutputDataRate::Hz760`])
-    Bw01 = 0b01,
+    Narrow = 0b01,
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 50 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 50 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 50 at 760 Hz ([`OutputDataRate::Hz760`])
-    Bw10 = 0b10,
+    Medium = 0b10,
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 70 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 100 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 100 at 760 Hz ([`OutputDataRate::Hz760`])
-    Bw11 = 0b11,
+    Wide = 0b11,
 }
 
 impl Bandwidth {
@@ -67,10 +67,10 @@ impl Bandwidth {
 
     pub(crate) const fn from_bits(value: u8) -> Self {
         match value {
-            0b00 => Bandwidth::Bw00,
-            0b01 => Bandwidth::Bw01,
-            0b10 => Bandwidth::Bw10,
-            0b11 => Bandwidth::Bw11,
+            0b00 => Bandwidth::Narrowest,
+            0b01 => Bandwidth::Narrow,
+            0b10 => Bandwidth::Medium,
+            0b11 => Bandwidth::Wide,
             _ => unreachable!(),
         }
     }
