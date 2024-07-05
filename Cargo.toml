@@ -1,6 +1,6 @@
 [package]
 name = "l3gd20-registers"
-version = "0.1.0-alpha.1"
+version = "0.1.0"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
 categories = ["embedded", "hardware-support", "no-std", "science::robotics"]
 description = "A typed map of the STMicroelectronics L3GD20 Gyroscope registers"
