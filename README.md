@@ -1,4 +1,4 @@
-# STMicroelectronics L3GD20 E-Compass Registers
+# STMicroelectronics L3GD20 Gyroscope Registers
 
 <!-- [![Crates.io][crates-image]][crates-link]
 [![Docs][docs-image]][docs-link] -->

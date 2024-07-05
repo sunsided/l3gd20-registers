@@ -1,6 +1,6 @@
-//! # STMicroelectronics LSM303DLHC E-Compass Registers
+//! # STMicroelectronics L3GD20 Gyrscope Registers
 //!
-//! This crate provides a typed map of the LSM303DLHC's I²C registers.
+//! This crate provides a typed map of the L3GD20's I²C/SPI registers.
 
 #![deny(missing_docs)]
 #![deny(warnings)]

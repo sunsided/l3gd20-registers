@@ -59,9 +59,9 @@ pub enum RegisterAddress {
     INT1_CFG = 0x30,
     /// See [`Int1SourceRegisterA`]. Read-only.
     INT1_SRC = 0x31,
-    /// See [`Int1ThresholdRegisterXL`]. Read-write.
+    /// See [`Int1ThresholdRegisterXH`]. Read-write.
     INT1_TSH_XH = 0x32,
-    /// See [`missing`]. Read-write.
+    /// See [`Int1ThresholdRegisterXL`]. Read-write.
     INT1_TSH_XL = 0x33,
     /// See [`Int1ThresholdRegisterYH`]. Read-write.
     INT1_TSH_YH = 0x34,
@@ -71,7 +71,7 @@ pub enum RegisterAddress {
     INT1_TSH_ZH = 0x36,
     /// See [`Int1ThresholdRegisterZL`]. Read-write.
     INT1_TSH_ZL = 0x37,
-    /// See [`missing`]. Read-write.
+    /// See [`Int1DurationRegister`]. Read-write.
     INT1_DURATION = 0x38,
 }
 
@@ -436,7 +436,7 @@ readable_register!(OutYHigh, RegisterAddress::OUT_Y_H);
 
 /// [`OUT_Z_L`](RegisterAddress::OUT_Z_L) (2Ch)
 ///
-/// Low byte of the 16-bit angular rate value. See [`OutZHighA`] for the high byte.
+/// Low byte of the 16-bit angular rate value. See [`OutZHigh`] for the high byte.
 ///
 /// ## Little Endian Data Order
 ///
@@ -566,7 +566,7 @@ pub struct Int1ConfigurationRegister {
 
 writable_register!(Int1ConfigurationRegister, RegisterAddress::INT1_CFG);
 
-/// [`INT1_SRC_A`](RegisterAddress::INT1_SRC_A) (31h)
+/// [`INT1_SRC`](RegisterAddress::INT1_SRC) (31h)
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
