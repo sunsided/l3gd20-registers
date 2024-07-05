@@ -78,6 +78,7 @@ macro_rules! writable_register {
     };
 }
 
+mod conversions;
 mod gyro;
 mod types;
 

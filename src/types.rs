@@ -37,25 +37,41 @@ impl OutputDataRate {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub enum Bandwidth {
+    /// Selects the narrowest filter bandwidth.
+    ///
     /// * 12.5 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 12.5 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 20 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 30 at 760 Hz ([`OutputDataRate::Hz760`])
+    ///
+    /// Rate noise density: 0.03 dps/√Hz
     Narrowest = 0b00,
+    /// Selects a narrow filter bandwidth.
+    ///
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 25 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 25 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 35 at 760 Hz ([`OutputDataRate::Hz760`])
+    ///
+    /// Rate noise density: 0.03 dps/√Hz
     Narrow = 0b01,
+    /// Selects a medium filter bandwidth.
+    ///
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 50 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 50 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 50 at 760 Hz ([`OutputDataRate::Hz760`])
+    ///
+    /// Rate noise density: 0.03 dps/√Hz
     Medium = 0b10,
+    /// Selects a wide filter bandwidth.
+    ///
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 70 at 190 Hz ([`OutputDataRate::Hz190`])
     /// * 100 at 380 Hz ([`OutputDataRate::Hz380`])
     /// * 100 at 760 Hz ([`OutputDataRate::Hz760`])
+    ///
+    /// Rate noise density: 0.03 dps/√Hz
     Wide = 0b11,
 }
 
@@ -114,13 +130,21 @@ impl HighpassFilterMode {
 #[repr(u8)]
 pub enum Sensitivity {
     /// 250 dps
-    G250 = 0b00,
+    ///
+    /// 8.75 mdps/digit; ±10 dps at zero-rate level
+    D250 = 0b00,
     /// 500 dps
-    G500 = 0b01,
+    ///
+    /// 17.50 mdps/digit; ±15 dps at zero-rate level
+    D500 = 0b01,
     /// 2000 dps
-    G2000 = 0b10,
+    ///
+    /// 70 mdps/digit; ±75 dps at zero-rate level
+    D2000 = 0b10,
     /// 2000 dps
-    G2000_11 = 0b11,
+    ///
+    /// 70 mdps/digit; ±75 dps at zero-rate level
+    D2000_11 = 0b11,
 }
 
 impl Sensitivity {
@@ -131,10 +155,10 @@ impl Sensitivity {
 
     pub(crate) const fn from_bits(value: u8) -> Self {
         match value {
-            0b00 => Sensitivity::G250,
-            0b01 => Sensitivity::G500,
-            0b10 => Sensitivity::G2000,
-            0b11 => Sensitivity::G2000_11,
+            0b00 => Sensitivity::D250,
+            0b01 => Sensitivity::D500,
+            0b10 => Sensitivity::D2000,
+            0b11 => Sensitivity::D2000_11,
             _ => unreachable!(),
         }
     }

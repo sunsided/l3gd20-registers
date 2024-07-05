@@ -296,6 +296,7 @@ writable_register!(ReferenceRegister, RegisterAddress::REFERENCE);
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct TemperatureRegister {
     /// Temperature data (1LSB/deg - 8-bit resolution). The value is expressed as two's complement.
+    /// Updates at a rate of 1 Hz.
     #[bits(8, access = RO)]
     pub temp: u8,
 }
@@ -359,6 +360,8 @@ pub struct OutXLow {
     /// Low byte of the X-axis value.
     ///
     /// Together with [`OutXHigh`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
@@ -382,6 +385,8 @@ pub struct OutXHigh {
     /// High byte of the X-axis value.
     ///
     /// Together with [`OutXLowA`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
@@ -405,6 +410,8 @@ pub struct OutYLow {
     /// Low byte of the Y-axis angular rate value.
     ///
     /// Together with [`OutYHigh`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
@@ -428,6 +435,8 @@ pub struct OutYHigh {
     /// High byte of the Y-axis angular rate value.
     ///
     /// Together with [`OutYLow`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
@@ -451,6 +460,8 @@ pub struct OutZLow {
     /// Low byte of the Z-axis angular rate value.
     ///
     /// Together with [`OutZHigh`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
@@ -473,7 +484,9 @@ readable_register!(OutZLow, RegisterAddress::OUT_Z_L);
 pub struct OutZHigh {
     /// High byte of the Z-axis angular rate value.
     ///
-    /// Together with [`OutZLowA`] this forms a reading expressed in two's complement.
+    /// Together with [`OutZLow`] this forms a reading expressed in two's complement.
+    ///
+    /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
     pub bits: u8,
 }
