@@ -48,9 +48,9 @@ pub enum Bandwidth {
     /// * 35 at 760 Hz ([`OutputDataRate::Hz760`])
     Bw01 = 0b01,
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
-    /// * 25 at 190 Hz ([`OutputDataRate::Hz190`])
-    /// * 25 at 380 Hz ([`OutputDataRate::Hz380`])
-    /// * 35 at 760 Hz ([`OutputDataRate::Hz760`])
+    /// * 50 at 190 Hz ([`OutputDataRate::Hz190`])
+    /// * 50 at 380 Hz ([`OutputDataRate::Hz380`])
+    /// * 50 at 760 Hz ([`OutputDataRate::Hz760`])
     Bw10 = 0b10,
     /// * 25 at 95 Hz ([`OutputDataRate::Hz95`])
     /// * 70 at 190 Hz ([`OutputDataRate::Hz190`])
