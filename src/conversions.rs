@@ -7,6 +7,10 @@ use core::ops::Add;
 /// cleared.
 macro_rules! combine_bytes {
     ($low:ident, $high:ident) => {
+        /// Combines the low and high byte into the two's complement value.
+        ///
+        /// Assumes [`ControlRegister4::big_endian`](crate::ControlRegister4::big_endian) is
+        /// cleared; with it set, the result is byte-swapped.
         impl Add<$high> for $low {
             type Output = i16;
 
@@ -15,6 +19,10 @@ macro_rules! combine_bytes {
             }
         }
 
+        /// Combines the high and low byte into the two's complement value.
+        ///
+        /// Assumes [`ControlRegister4::big_endian`](crate::ControlRegister4::big_endian) is
+        /// cleared; with it set, the result is byte-swapped.
         impl Add<$low> for $high {
             type Output = i16;
 

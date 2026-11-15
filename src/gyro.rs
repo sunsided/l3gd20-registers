@@ -840,8 +840,11 @@ mod tests {
 
     #[test]
     fn temperature_is_signed() {
-        assert_eq!(TemperatureRegister::from(0xFB).temp(), -5);
-        assert_eq!(TemperatureRegister::from(0x19).temp(), 25);
+        for (raw, celsius) in [(0xFB, -5), (0x19, 25), (0x80, -128), (0x7F, 127), (0x00, 0)] {
+            let reg = TemperatureRegister::from(raw);
+            assert_eq!(reg.temp(), celsius);
+            assert_eq!(u8::from(reg), raw);
+        }
     }
 
     /// Bit positions follow the register tables of the L3GD20 datasheet (DocID022116).
