@@ -5,6 +5,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
+[0.3.0]: https://github.com/sunsided/l3gd20-registers/releases/tag/v0.3.0
+
 ### Added
 
 - `ReadableRegister` for readable registers, alongside `Register` and `WritableRegister`.
