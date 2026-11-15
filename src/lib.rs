@@ -143,7 +143,7 @@ pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> + From<u8> + 
 /// Most registers decode every bit pattern. [`FifoControlRegister`] rejects reserved
 /// FIFO modes, so generic code reads through [`TryFromBits`](prelude::TryFromBits).
 pub trait ReadableRegister:
-    Register + prelude::ReadableI2CRegister8<prelude::DeviceAddress7> + prelude::TryFromBits<u8>
+    Register + prelude::ReadableI2CRegister8<prelude::DeviceAddress7>
 {
 }
 

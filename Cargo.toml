@@ -18,7 +18,7 @@ defmt = ["dep:defmt"]
 [dependencies]
 bitfield-struct = "0.13.0"
 defmt = { version = "1.0.1", optional = true }
-hardware-registers = "0.4.0"
+hardware-registers = "0.4.1"
 
 [package.metadata.docs.rs]
 all-features = true

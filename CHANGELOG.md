@@ -14,7 +14,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- [**breaking**] Updated to `hardware-registers` 0.4. `Register` no longer implies
+- [**breaking**] Updated to `hardware-registers` 0.4.1. `Register` no longer implies
   readability; use `ReadableRegister` for reads.
 - [**breaking**] `FifoControlRegister` decodes through `TryFromBits` and rejects the
   reserved FIFO modes `0b101` to `0b111` with `InvalidFifoMode`.
