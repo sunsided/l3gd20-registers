@@ -1,53 +1,33 @@
 use crate::{OutXHigh, OutXLow, OutYHigh, OutYLow, OutZHigh, OutZLow};
 use core::ops::Add;
 
-impl Add<OutXHigh> for OutXLow {
-    type Output = i16;
+/// Combines the low and high byte of an axis into its two's complement value.
+///
+/// Assumes the default data order, i.e. [`ControlRegister4::big_endian`](crate::ControlRegister4::big_endian)
+/// cleared.
+macro_rules! combine_bytes {
+    ($low:ident, $high:ident) => {
+        impl Add<$high> for $low {
+            type Output = i16;
 
-    fn add(self, hi: OutXHigh) -> Self::Output {
-        (hi.bits() as i16) << 8 | (self.bits() as i16)
-    }
+            fn add(self, hi: $high) -> Self::Output {
+                i16::from_le_bytes([self.bits(), hi.bits()])
+            }
+        }
+
+        impl Add<$low> for $high {
+            type Output = i16;
+
+            fn add(self, lo: $low) -> Self::Output {
+                lo.add(self)
+            }
+        }
+    };
 }
 
-impl Add<OutXLow> for OutXHigh {
-    type Output = i16;
-
-    fn add(self, lo: OutXLow) -> Self::Output {
-        lo.add(self)
-    }
-}
-
-impl Add<OutYHigh> for OutYLow {
-    type Output = i16;
-
-    fn add(self, hi: OutYHigh) -> Self::Output {
-        (hi.bits() as i16) << 8 | (self.bits() as i16)
-    }
-}
-
-impl Add<OutYLow> for OutYHigh {
-    type Output = i16;
-
-    fn add(self, lo: OutYLow) -> Self::Output {
-        lo.add(self)
-    }
-}
-
-impl Add<OutZHigh> for OutZLow {
-    type Output = i16;
-
-    fn add(self, hi: OutZHigh) -> Self::Output {
-        (hi.bits() as i16) << 8 | (self.bits() as i16)
-    }
-}
-
-impl Add<OutZLow> for OutZHigh {
-    type Output = i16;
-
-    fn add(self, lo: OutZLow) -> Self::Output {
-        lo.add(self)
-    }
-}
+combine_bytes!(OutXLow, OutXHigh);
+combine_bytes!(OutYLow, OutYHigh);
+combine_bytes!(OutZLow, OutZHigh);
 
 #[cfg(test)]
 mod tests {

@@ -306,7 +306,7 @@ pub struct TemperatureRegister {
     /// Temperature data (1LSB/deg - 8-bit resolution). The value is expressed as two's complement.
     /// Updates at a rate of 1 Hz.
     #[bits(8, access = RO)]
-    pub temp: u8,
+    pub temp: i8,
 }
 
 readable_register!(TemperatureRegister, RegisterAddress::OUT_TEMP);
@@ -355,12 +355,11 @@ readable_register!(StatusRegister, RegisterAddress::STATUS_REG);
 ///
 /// Low byte of the 16-bit angular rate value. See [`OutXHigh`] for the high byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -380,12 +379,11 @@ readable_register!(OutXLow, RegisterAddress::OUT_X_L);
 ///
 /// High byte of the 16-bit angular rate value. See [`OutXLow`] for the low byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -405,12 +403,11 @@ readable_register!(OutXHigh, RegisterAddress::OUT_X_H);
 ///
 /// Low byte of the 16-bit angular rate value. See [`OutYHigh`] for the high byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -430,12 +427,11 @@ readable_register!(OutYLow, RegisterAddress::OUT_Y_L);
 ///
 /// High byte of the 16-bit angular rate value. See [`OutYLow`] for the low byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -455,12 +451,11 @@ readable_register!(OutYHigh, RegisterAddress::OUT_Y_H);
 ///
 /// Low byte of the 16-bit angular rate value. See [`OutZHigh`] for the high byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -480,12 +475,11 @@ readable_register!(OutZLow, RegisterAddress::OUT_Z_L);
 ///
 /// High byte of the 16-bit angular rate value. See [`OutZLow`] for the low byte.
 ///
-/// ## Little Endian Data Order
+/// ## Data Order
 ///
-/// Note that the registers are provided in little endian order, i.e. the low byte
-/// has the lower register address and will be read first.
-/// While the temperature readings follow the same principle, the magnetometer readings
-/// have a different order.
+/// With [`ControlRegister4::big_endian`] cleared (the default), the low byte has the lower
+/// register address and is read first. Setting it swaps the bytes: `OUT_*_L` then holds
+/// the high byte. Adding a low and a high register assumes the default order.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -506,7 +500,8 @@ readable_register!(OutZHigh, RegisterAddress::OUT_Z_H);
 /// The FIFO mode bits have reserved patterns (`0b101` to `0b111`). Decoding through
 /// [`TryFromBits`](crate::prelude::TryFromBits) rejects them with [`InvalidFifoMode`];
 /// [`FifoControlRegister::fifo_mode`] panics on a value built from such bits with `From<u8>`.
-#[bitfield(u8, order = Msb)]
+/// `Debug` prints the reserved mode instead of panicking.
+#[bitfield(u8, order = Msb, debug = false)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct FifoControlRegister {
@@ -536,6 +531,19 @@ impl crate::prelude::TryFromBits<u8> for FifoControlRegister {
 }
 
 impl crate::ReadableRegister for FifoControlRegister {}
+
+impl core::fmt::Debug for FifoControlRegister {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let bits = u8::from(*self);
+        let mode = bits >> 5;
+        let mut s = f.debug_struct("FifoControlRegister");
+        match FifoMode::try_from_bits(mode) {
+            Some(fifo_mode) => s.field("fifo_mode", &fifo_mode),
+            None => s.field("fifo_mode", &InvalidFifoMode(mode)),
+        };
+        s.field("watermark", &self.watermark()).finish()
+    }
+}
 
 /// [`FIFO_SRC_REG`](RegisterAddress::FIFO_SRC_REG) (2Fh)
 #[bitfield(u8, order = Msb)]
@@ -800,6 +808,54 @@ mod tests {
             FifoControlRegister::try_from_bits(0b1111_1111),
             Err(InvalidFifoMode(0b111))
         );
+    }
+
+    #[test]
+    fn fifo_control_debug_does_not_panic() {
+        extern crate std;
+        use std::format;
+        assert_eq!(
+            format!("{:?}", FifoControlRegister::from(0b1010_0011)),
+            "FifoControlRegister { fifo_mode: InvalidFifoMode(5), watermark: 3 }"
+        );
+        assert_eq!(
+            format!("{:?}", FifoControlRegister::from(0b0100_0001)),
+            "FifoControlRegister { fifo_mode: Stream, watermark: 1 }"
+        );
+    }
+
+    #[test]
+    fn temperature_is_signed() {
+        assert_eq!(TemperatureRegister::from(0xFB).temp(), -5);
+        assert_eq!(TemperatureRegister::from(0x19).temp(), 25);
+    }
+
+    /// Bit positions follow the register tables of the L3GD20 datasheet (DocID022116).
+    #[test]
+    fn flag_layouts() {
+        let s = StatusRegister::from(0b1010_0101);
+        assert!(s.zyx_overrun() && !s.z_overrun() && s.y_overrun() && !s.x_overrun());
+        assert!(!s.zyx_da() && s.z_da() && !s.y_da() && s.x_da());
+
+        let c3 = ControlRegister3::from(0b1001_0110);
+        assert!(c3.i1int1() && !c3.i1boot() && !c3.int1_low() && c3.open_drain());
+        assert!(!c3.i2drdy() && c3.i2wtm() && c3.i2orun() && !c3.i2empty());
+
+        let c4 = ControlRegister4::from(0b1101_0001);
+        assert!(c4.block_data_update() && c4.big_endian() && c4.spi_serial_3wire());
+        assert_eq!(c4.full_scale(), Sensitivity::D500);
+
+        let c5 = ControlRegister5::from(0b0101_1001);
+        assert!(!c5.boot() && c5.fifo_enable() && c5.hpen());
+        assert_eq!((c5.int1_sel(), c5.out_sel()), (0b10, 0b01));
+
+        let cfg = Int1ConfigurationRegister::from(0b1001_0110);
+        assert!(cfg.aoi() && !cfg.lir() && !cfg.zhie() && cfg.zlie());
+        assert!(!cfg.yhie() && cfg.ylie() && cfg.xhie() && !cfg.xlie());
+
+        let src = Int1SourceRegisterA::from(0b0110_1001);
+        assert!(src.ia() && src.z_high() && !src.z_low() && src.y_high());
+        assert!(!src.y_low() && !src.x_high() && src.x_low());
     }
 
     #[test]

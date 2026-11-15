@@ -27,6 +27,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `WhoAmI` is read-only and no longer implements `WritableRegister`. `WhoAmI::new()`
   holds the expected identification value.
 - `Bandwidth::Narrow.sqrt_hz_at(OutputDataRate::Hz380)` returned `25.0` instead of `5.0`.
+- [**breaking**] `TemperatureRegister::temp` is `i8`. The register holds a two's complement
+  value, so negative readings appeared as values above 127.
+- `Debug` for a `FifoControlRegister` holding a reserved FIFO mode panicked; it now prints
+  the `InvalidFifoMode`.
+- The output register docs no longer claim a fixed little-endian order; the order depends on
+  `ControlRegister4::big_endian`.
 
 ## [0.2.0] - 2024-07-06
 
