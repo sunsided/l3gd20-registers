@@ -1,6 +1,8 @@
 //! Gyroscope registers.
 
-use crate::types::{Bandwidth, FifoMode, HighpassFilterMode, OutputDataRate, Sensitivity};
+use crate::types::{
+    Bandwidth, FifoMode, HighpassFilterMode, InvalidFifoMode, OutputDataRate, Sensitivity,
+};
 use bitfield_struct::bitfield;
 
 /// The I²C bus address.
@@ -15,11 +17,10 @@ pub const DEFAULT_DEVICE_ADDRESS: u8 = 0b0110_1010;
 /// Register addresses specific to the Gyroscope sensor.
 ///
 /// See also [`DEFAULT_DEVICE_ADDRESS`].
-#[allow(dead_code)]
 #[allow(non_camel_case_types)]
-#[allow(missing_docs)]
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[repr(u8)]
 pub enum RegisterAddress {
     /// See [`WhoAmI`]. Read-only.
     WHO_AM_I = 0x0F,
@@ -89,16 +90,23 @@ impl From<RegisterAddress> for u8 {
 }
 
 /// [`WHO_AM_I`](RegisterAddress::WHO_AM_I) (0Fh)
+///
+/// The register is read-only:
+///
+/// ```compile_fail
+/// fn write<R: l3gd20_registers::WritableRegister>() {}
+/// write::<l3gd20_registers::WhoAmI>();
+/// ```
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct WhoAmI {
-    /// The identification value. Always `0b11010100`
-    #[bits(8, access = RO)]
+    /// The identification value. Always [`L3GD20_WHO_AM_I`](crate::L3GD20_WHO_AM_I).
+    #[bits(8, access = RO, default = crate::L3GD20_WHO_AM_I)]
     pub ident: u8,
 }
 
-writable_register!(WhoAmI, RegisterAddress::WHO_AM_I);
+readable_register!(WhoAmI, RegisterAddress::WHO_AM_I);
 
 /// [`CTRL_REG1`](RegisterAddress::CTRL_REG1) (20h)
 #[bitfield(u8, order = Msb)]
@@ -230,7 +238,7 @@ pub struct ControlRegister4 {
 
     /// SPI serial interface mode.
     ///
-    /// * `false` - 4-wire interface (true)
+    /// * `false` - 4-wire interface (default)
     /// * `true` - 3-wire interface
     #[bits(1, access = RW)]
     pub spi_serial_3wire: bool,
@@ -384,7 +392,7 @@ readable_register!(OutXLow, RegisterAddress::OUT_X_L);
 pub struct OutXHigh {
     /// High byte of the X-axis value.
     ///
-    /// Together with [`OutXLowA`] this forms a reading expressed in two's complement.
+    /// Together with [`OutXLow`] this forms a reading expressed in two's complement.
     ///
     /// Sensitivity in mdps/digit as well as error depend on [`Sensitivity`] and [`Bandwidth`].
     #[bits(8, access = RO)]
@@ -494,6 +502,10 @@ pub struct OutZHigh {
 readable_register!(OutZHigh, RegisterAddress::OUT_Z_H);
 
 /// [`FIFO_CTRL_REG`](RegisterAddress::FIFO_CTRL_REG) (2Eh)
+///
+/// The FIFO mode bits have reserved patterns (`0b101` to `0b111`). Decoding through
+/// [`TryFromBits`](crate::prelude::TryFromBits) rejects them with [`InvalidFifoMode`];
+/// [`FifoControlRegister::fifo_mode`] panics on a value built from such bits with `From<u8>`.
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -507,9 +519,25 @@ pub struct FifoControlRegister {
     pub watermark: u8,
 }
 
-writable_register!(FifoControlRegister, RegisterAddress::FIFO_CTRL_REG);
+register!(FifoControlRegister, RegisterAddress::FIFO_CTRL_REG);
+write_access!(FifoControlRegister);
 
-/// [`FIFO_CTRL_REG`](RegisterAddress::FIFO_SRC_REG) (2Fh)
+impl crate::prelude::TryFromBits<u8> for FifoControlRegister {
+    type Error = InvalidFifoMode;
+
+    #[inline]
+    fn try_from_bits_ref(value: &u8) -> Result<Self, Self::Error> {
+        let mode = *value >> 5;
+        match FifoMode::try_from_bits(mode) {
+            Some(_) => Ok(Self::from(*value)),
+            None => Err(InvalidFifoMode(mode)),
+        }
+    }
+}
+
+impl crate::ReadableRegister for FifoControlRegister {}
+
+/// [`FIFO_SRC_REG`](RegisterAddress::FIFO_SRC_REG) (2Fh)
 #[bitfield(u8, order = Msb)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -720,3 +748,68 @@ pub struct Int1DurationRegister {
 }
 
 writable_register!(Int1DurationRegister, RegisterAddress::INT1_DURATION);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::*;
+
+    #[test]
+    fn power_on_defaults() {
+        assert_eq!(u8::from(WhoAmI::new()), 0xD4);
+        assert_eq!(u8::from(ControlRegister1::new()), 0x07);
+        assert_eq!(u8::from(ControlRegister4::new()), 0x00);
+        assert_eq!(u8::from(FifoControlRegister::new()), 0x00);
+    }
+
+    #[test]
+    fn control_register_1_layout() {
+        let reg = ControlRegister1::new()
+            .with_output_data_rate(OutputDataRate::Hz760)
+            .with_bandwidth(Bandwidth::Narrow)
+            .with_power_up(true);
+        assert_eq!(u8::from(reg), 0b1101_1111);
+    }
+
+    #[test]
+    fn addresses() {
+        assert_eq!(
+            <WhoAmI as I2CRegister<DeviceAddress7, RegisterAddress8, R1>>::REGISTER_ADDRESS,
+            RegisterAddress8::new(0x0F)
+        );
+        assert_eq!(
+            <OutZHigh as SPIRegister<RegisterAddress8, R1>>::REGISTER_ADDRESS,
+            RegisterAddress8::new(0x2D)
+        );
+        assert_eq!(
+            <WhoAmI as I2CRegister<DeviceAddress7, RegisterAddress8, R1>>::DEFAULT_DEVICE_ADDRESS,
+            DeviceAddress7::new(0x6A)
+        );
+    }
+
+    #[test]
+    fn fifo_control_rejects_reserved_modes() {
+        let reg = FifoControlRegister::try_from_bits(0b0100_0101).unwrap();
+        assert_eq!(reg.fifo_mode(), FifoMode::Stream);
+        assert_eq!(reg.watermark(), 0b0_0101);
+        assert_eq!(
+            FifoControlRegister::try_from_bits(0b1010_0000),
+            Err(InvalidFifoMode(0b101))
+        );
+        assert_eq!(
+            FifoControlRegister::try_from_bits(0b1111_1111),
+            Err(InvalidFifoMode(0b111))
+        );
+    }
+
+    #[test]
+    fn readable_and_writable_bounds() {
+        fn readable<R: ReadableRegister + ReadableSPIRegister8>() {}
+        fn writable<R: WritableRegister + WritableSPIRegister8>() {}
+        readable::<WhoAmI>();
+        readable::<FifoControlRegister>();
+        readable::<OutXLow>();
+        writable::<FifoControlRegister>();
+        writable::<ControlRegister1>();
+    }
+}

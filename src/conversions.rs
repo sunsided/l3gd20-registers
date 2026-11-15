@@ -48,3 +48,17 @@ impl Add<OutZLow> for OutZHigh {
         lo.add(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn combines_low_and_high_bytes() {
+        let (lo, hi) = (OutXLow::from(0x34), OutXHigh::from(0xF2));
+        assert_eq!(lo + hi, 0xF234_u16 as i16);
+        assert_eq!(hi + lo, 0xF234_u16 as i16);
+        assert_eq!(OutYLow::from(0xFF) + OutYHigh::from(0x7F), i16::MAX);
+        assert_eq!(OutZLow::from(0x00) + OutZHigh::from(0x80), i16::MIN);
+    }
+}

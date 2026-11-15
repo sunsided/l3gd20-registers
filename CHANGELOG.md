@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `ReadableRegister` for readable registers, alongside `Register` and `WritableRegister`.
+- SPI registers implement the `SPIRegister8` marker traits of `hardware-registers`.
+- `I2C_AUTO_INCREMENT`, `SPI_READ`, `SPI_AUTO_INCREMENT` and `L3GD20_WHO_AM_I` constants.
+- `FifoMode::try_from_bits` and `InvalidFifoMode`.
+
+### Changed
+
+- [**breaking**] Updated to `hardware-registers` 0.4. `Register` no longer implies
+  readability; use `ReadableRegister` for reads.
+- [**breaking**] `FifoControlRegister` decodes through `TryFromBits` and rejects the
+  reserved FIFO modes `0b101` to `0b111` with `InvalidFifoMode`.
+- [**breaking**] SPI register addresses are `RegisterAddress8` instead of `RegisterAddress6`.
+- [**breaking**] Edition 2024; the MSRV is now Rust 1.85.
+- Updated `bitfield-struct` to 0.13 and `defmt` to 1.0.
+
+### Fixed
+
+- `WhoAmI` is read-only and no longer implements `WritableRegister`. `WhoAmI::new()`
+  holds the expected identification value.
+- `Bandwidth::Narrow.sqrt_hz_at(OutputDataRate::Hz380)` returned `25.0` instead of `5.0`.
+
 ## [0.2.0] - 2024-07-06
 
 [0.2.0]: https://github.com/sunsided/l3gd20-registers/releases/tag/v0.2.0
