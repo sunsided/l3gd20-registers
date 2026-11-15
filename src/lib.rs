@@ -133,22 +133,24 @@ pub const SPI_READ: u8 = 0x80;
 pub const SPI_AUTO_INCREMENT: u8 = 0x40;
 
 /// The value of the [`WhoAmI`] register for a L3GD20.
+///
+/// The L3GD20H reports `0xD7`. Its register map differs, and this crate does not cover it.
 pub const L3GD20_WHO_AM_I: u8 = 0b1101_0100;
 
 /// A gyroscope register.
 pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> + From<u8> + Into<u8> {}
 
-/// A readable gyroscope register.
+/// A readable gyroscope register, over I²C and SPI.
 ///
 /// Most registers decode every bit pattern. [`FifoControlRegister`] rejects reserved
 /// FIFO modes, so generic code reads through [`TryFromBits`](prelude::TryFromBits).
 pub trait ReadableRegister:
-    Register + prelude::ReadableI2CRegister8<prelude::DeviceAddress7>
+    Register + prelude::ReadableI2CRegister8<prelude::DeviceAddress7> + prelude::ReadableSPIRegister8
 {
 }
 
-/// A writable gyroscope register.
+/// A writable gyroscope register, over I²C and SPI.
 pub trait WritableRegister:
-    Register + prelude::WritableI2CRegister8<prelude::DeviceAddress7>
+    Register + prelude::WritableI2CRegister8<prelude::DeviceAddress7> + prelude::WritableSPIRegister8
 {
 }

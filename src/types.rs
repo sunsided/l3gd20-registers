@@ -284,21 +284,27 @@ impl FifoMode {
             _ => None,
         }
     }
-
-    pub(crate) const fn from_bits(value: u8) -> Self {
-        match Self::try_from_bits(value) {
-            Some(mode) => mode,
-            None => panic!("reserved FIFO mode"),
-        }
-    }
 }
 
 /// A [`FifoControlRegister`](crate::FifoControlRegister) value holds a reserved FIFO mode.
-///
-/// Contains the raw three mode bits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct InvalidFifoMode(pub u8);
+pub struct InvalidFifoMode(pub(crate) u8);
+
+impl InvalidFifoMode {
+    /// The raw three mode bits, `0b101` to `0b111`.
+    pub const fn mode(&self) -> u8 {
+        self.0
+    }
+}
+
+impl core::fmt::Display for InvalidFifoMode {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "reserved FIFO mode {:#05b}", self.0)
+    }
+}
+
+impl core::error::Error for InvalidFifoMode {}
 
 #[cfg(test)]
 mod tests {
@@ -332,7 +338,7 @@ mod tests {
     #[test]
     fn fifo_mode_round_trip() {
         for bits in 0..=0b100 {
-            assert_eq!(FifoMode::from_bits(bits).into_bits(), bits);
+            assert_eq!(FifoMode::try_from_bits(bits).unwrap().into_bits(), bits);
         }
         for bits in 0b101..=0b111 {
             assert_eq!(FifoMode::try_from_bits(bits), None);

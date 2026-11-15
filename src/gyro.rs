@@ -93,7 +93,7 @@ impl From<RegisterAddress> for u8 {
 ///
 /// The register is read-only:
 ///
-/// ```compile_fail
+/// ```compile_fail,E0277
 /// fn write<R: l3gd20_registers::WritableRegister>() {}
 /// write::<l3gd20_registers::WhoAmI>();
 /// ```
@@ -498,20 +498,41 @@ readable_register!(OutZHigh, RegisterAddress::OUT_Z_H);
 /// [`FIFO_CTRL_REG`](RegisterAddress::FIFO_CTRL_REG) (2Eh)
 ///
 /// The FIFO mode bits have reserved patterns (`0b101` to `0b111`). Decoding through
-/// [`TryFromBits`](crate::prelude::TryFromBits) rejects them with [`InvalidFifoMode`];
-/// [`FifoControlRegister::fifo_mode`] panics on a value built from such bits with `From<u8>`.
-/// `Debug` prints the reserved mode instead of panicking.
+/// [`TryFromBits`](crate::prelude::TryFromBits) rejects them with [`InvalidFifoMode`], and
+/// [`FifoControlRegister::fifo_mode`] reports them for values built with `From<u8>`.
 #[bitfield(u8, order = Msb, debug = false)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct FifoControlRegister {
-    /// FIFO mode selection
-    #[bits(3, access = RW, default = FifoMode::Bypass)]
-    pub fifo_mode: FifoMode,
+    /// The raw FIFO mode bits; see [`FifoControlRegister::fifo_mode`].
+    #[bits(3, access = RW, default = 0)]
+    fifo_mode_bits: u8,
 
     /// FIFO threshold. Watermark level setting.
     #[bits(5, access = RW)]
     pub watermark: u8,
+}
+
+impl FifoControlRegister {
+    /// FIFO mode selection, or [`InvalidFifoMode`] for a reserved bit pattern.
+    pub const fn fifo_mode(&self) -> Result<FifoMode, InvalidFifoMode> {
+        let bits = self.fifo_mode_bits();
+        match FifoMode::try_from_bits(bits) {
+            Some(mode) => Ok(mode),
+            None => Err(InvalidFifoMode(bits)),
+        }
+    }
+
+    /// Returns a copy with the FIFO mode set.
+    #[must_use]
+    pub const fn with_fifo_mode(self, mode: FifoMode) -> Self {
+        self.with_fifo_mode_bits(mode.into_bits())
+    }
+
+    /// Sets the FIFO mode.
+    pub fn set_fifo_mode(&mut self, mode: FifoMode) {
+        self.set_fifo_mode_bits(mode.into_bits());
+    }
 }
 
 register!(FifoControlRegister, RegisterAddress::FIFO_CTRL_REG);
@@ -522,11 +543,8 @@ impl crate::prelude::TryFromBits<u8> for FifoControlRegister {
 
     #[inline]
     fn try_from_bits_ref(value: &u8) -> Result<Self, Self::Error> {
-        let mode = *value >> 5;
-        match FifoMode::try_from_bits(mode) {
-            Some(_) => Ok(Self::from(*value)),
-            None => Err(InvalidFifoMode(mode)),
-        }
+        let register = Self::from(*value);
+        register.fifo_mode().map(|_| register)
     }
 }
 
@@ -534,14 +552,10 @@ impl crate::ReadableRegister for FifoControlRegister {}
 
 impl core::fmt::Debug for FifoControlRegister {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let bits = u8::from(*self);
-        let mode = bits >> 5;
-        let mut s = f.debug_struct("FifoControlRegister");
-        match FifoMode::try_from_bits(mode) {
-            Some(fifo_mode) => s.field("fifo_mode", &fifo_mode),
-            None => s.field("fifo_mode", &InvalidFifoMode(mode)),
-        };
-        s.field("watermark", &self.watermark()).finish()
+        f.debug_struct("FifoControlRegister")
+            .field("fifo_mode", &self.fifo_mode())
+            .field("watermark", &self.watermark())
+            .finish()
     }
 }
 
@@ -798,7 +812,7 @@ mod tests {
     #[test]
     fn fifo_control_rejects_reserved_modes() {
         let reg = FifoControlRegister::try_from_bits(0b0100_0101).unwrap();
-        assert_eq!(reg.fifo_mode(), FifoMode::Stream);
+        assert_eq!(reg.fifo_mode(), Ok(FifoMode::Stream));
         assert_eq!(reg.watermark(), 0b0_0101);
         assert_eq!(
             FifoControlRegister::try_from_bits(0b1010_0000),
@@ -816,11 +830,11 @@ mod tests {
         use std::format;
         assert_eq!(
             format!("{:?}", FifoControlRegister::from(0b1010_0011)),
-            "FifoControlRegister { fifo_mode: InvalidFifoMode(5), watermark: 3 }"
+            "FifoControlRegister { fifo_mode: Err(InvalidFifoMode(5)), watermark: 3 }"
         );
         assert_eq!(
             format!("{:?}", FifoControlRegister::from(0b0100_0001)),
-            "FifoControlRegister { fifo_mode: Stream, watermark: 1 }"
+            "FifoControlRegister { fifo_mode: Ok(Stream), watermark: 1 }"
         );
     }
 
@@ -860,8 +874,8 @@ mod tests {
 
     #[test]
     fn readable_and_writable_bounds() {
-        fn readable<R: ReadableRegister + ReadableSPIRegister8>() {}
-        fn writable<R: WritableRegister + WritableSPIRegister8>() {}
+        fn readable<R: ReadableRegister>() {}
+        fn writable<R: WritableRegister>() {}
         readable::<WhoAmI>();
         readable::<FifoControlRegister>();
         readable::<OutXLow>();
