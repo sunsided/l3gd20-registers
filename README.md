@@ -3,6 +3,7 @@
 [![Crates.io][crates-image]][crates-link]
 [![Docs][docs-image]][docs-link]
 [![Build Status][build-image]][build-link]
+[![Coverage][codecov-image]][codecov-link]
 [![Safety Dance][safety-image]][safety-link]
 ![MSRV][msrv-image]
 [![EUPL 1.2 licensed][license-eupl-image]][license-eupl-link]
@@ -11,7 +12,8 @@
 
 > A typed map of the L3GD20's I²C/SPI-accessible registers.
 
-Provides functions and named fields to read and modify the sensor registers.
+Provides functions and named fields to read and modify the sensor registers,
+built on [`hardware-registers`](https://crates.io/crates/hardware-registers).
 
 See also [lsm303dlhc-registers](https://crates.io/crates/lsm303dlhc-registers).
 
@@ -21,7 +23,7 @@ We abide by the [Contributor Covenant][cc] and ask that you do as well.
 
 ## License
 
-Copyright © 2024 Markus Mayer
+Copyright © 2024–2026 Markus Mayer
 
 Triple licensed under your choice of either of:
 
@@ -46,11 +48,15 @@ made available under MIT and Apache 2.0 licenses.
 
 [build-link]: https://github.com/sunsided/l3gd20-registers/actions
 
+[codecov-image]: https://codecov.io/gh/sunsided/l3gd20-registers/graph/badge.svg
+
+[codecov-link]: https://codecov.io/gh/sunsided/l3gd20-registers
+
 [safety-image]: https://img.shields.io/badge/unsafe-forbidden-success.svg
 
 [safety-link]: https://github.com/rust-secure-code/safety-dance/
 
-[msrv-image]: https://img.shields.io/badge/rustc-1.64+-blue.svg
+[msrv-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 
 [license-eupl-image]: https://img.shields.io/badge/license-EUPL_1.2-blue.svg
 
@@ -58,10 +64,10 @@ made available under MIT and Apache 2.0 licenses.
 
 [license-mit-image]: https://img.shields.io/badge/license-MIT-blue.svg
 
-[license-apache-link]: https://github.com/sunsided/l3gd20-registers/blob/develop/LICENSE-APACHE
+[license-apache-link]: https://github.com/sunsided/l3gd20-registers/blob/main/LICENSE-APACHE
 
-[license-mit-link]: https://github.com/sunsided/l3gd20-registers/blob/develop/LICENSE-MIT
+[license-mit-link]: https://github.com/sunsided/l3gd20-registers/blob/main/LICENSE-MIT
 
-[license-eupl-link]: https://github.com/sunsided/l3gd20-registers/blob/develop/LICENSE-EUPL
+[license-eupl-link]: https://github.com/sunsided/l3gd20-registers/blob/main/LICENSE-EUPL
 
 [cc]: https://contributor-covenant.org

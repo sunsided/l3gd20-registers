@@ -125,7 +125,7 @@ impl Bandwidth {
             Bandwidth::Narrow => match odr {
                 OutputDataRate::Hz95 => 5.0,                // √(25.0 Hz)
                 OutputDataRate::Hz190 => 5.0,               // √(25.0 Hz)
-                OutputDataRate::Hz380 => 25.0,              // √(25.0 Hz)
+                OutputDataRate::Hz380 => 5.0,               // √(25.0 Hz)
                 OutputDataRate::Hz760 => 5.916079783099616, // √(35.0 Hz)
             },
             Bandwidth::Medium => match odr {
@@ -273,14 +273,75 @@ impl FifoMode {
         self as u8
     }
 
-    pub(crate) const fn from_bits(value: u8) -> Self {
+    /// Decodes the mode, or returns `None` for the reserved patterns `0b101` to `0b111`.
+    pub const fn try_from_bits(value: u8) -> Option<Self> {
         match value {
-            0b000 => FifoMode::Bypass,
-            0b001 => FifoMode::FIFO,
-            0b010 => FifoMode::Stream,
-            0b011 => FifoMode::StreamToFifo,
-            0b100 => FifoMode::BypassToStream,
-            _ => unreachable!(),
+            0b000 => Some(FifoMode::Bypass),
+            0b001 => Some(FifoMode::FIFO),
+            0b010 => Some(FifoMode::Stream),
+            0b011 => Some(FifoMode::StreamToFifo),
+            0b100 => Some(FifoMode::BypassToStream),
+            _ => None,
+        }
+    }
+}
+
+/// A [`FifoControlRegister`](crate::FifoControlRegister) value holds a reserved FIFO mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct InvalidFifoMode(pub(crate) u8);
+
+impl InvalidFifoMode {
+    /// The raw three mode bits, `0b101` to `0b111`.
+    pub const fn mode(&self) -> u8 {
+        self.0
+    }
+}
+
+impl core::fmt::Display for InvalidFifoMode {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "reserved FIFO mode {:#05b}", self.0)
+    }
+}
+
+impl core::error::Error for InvalidFifoMode {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const ODRS: [OutputDataRate; 4] = [
+        OutputDataRate::Hz95,
+        OutputDataRate::Hz190,
+        OutputDataRate::Hz380,
+        OutputDataRate::Hz760,
+    ];
+
+    #[test]
+    fn sqrt_hz_matches_hz() {
+        for bw in [
+            Bandwidth::Narrowest,
+            Bandwidth::Narrow,
+            Bandwidth::Medium,
+            Bandwidth::Wide,
+        ] {
+            for odr in ODRS {
+                let sqrt = bw.sqrt_hz_at(odr);
+                assert!(
+                    (sqrt * sqrt - bw.hz_at(odr)).abs() < 1e-4,
+                    "{bw:?} at {odr:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn fifo_mode_round_trip() {
+        for bits in 0..=0b100 {
+            assert_eq!(FifoMode::try_from_bits(bits).unwrap().into_bits(), bits);
+        }
+        for bits in 0b101..=0b111 {
+            assert_eq!(FifoMode::try_from_bits(bits), None);
         }
     }
 }
